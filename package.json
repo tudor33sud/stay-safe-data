@@ -1,0 +1,11 @@
+{
+  "name": "stay-safe-data",
+  "version": "1.0.0",
+  "description": "Stay safe data service",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tudor Suditu",
+  "license": "ISC"
+}
