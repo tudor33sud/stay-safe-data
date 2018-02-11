@@ -6,6 +6,21 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tudor33sud/stay-safe-data.git"
+  },
   "author": "Tudor Suditu",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^5.0.0",
+    "express": "^4.16.2",
+    "express-validator": "^5.0.0",
+    "lodash": "^4.17.5",
+    "promises-retry": "^3.0.4",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
+    "uuid": "^3.2.1",
+    "winston": "^2.4.0"
+  }
 }
