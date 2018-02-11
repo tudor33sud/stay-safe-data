@@ -20,7 +20,7 @@ const loggingFormatter = function (options) {
         timestamp,
         requestId,
         logLevel,
-        service: appConfig.SERVICE_NAME,
+        service: appConfig.serviceName,
         stackTrace: stack,
         environment,
         referrer
