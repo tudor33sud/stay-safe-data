@@ -4,6 +4,7 @@ const environment = process.env.NODE_ENV || 'localhost';
 const express = require('express');
 
 const app = express();
+const db = require('./db');
 const appConfig = require('./config');
 const reqUtils = require('./utils/requests');
 const tracing = require('./utils/tracing');
@@ -17,18 +18,24 @@ app.use(reqUtils.middleware.cors());
 //append request id for tracing
 app.use(tracing(appConfig.tracingHeaderKey));
 
+app.use(reqUtils.middleware.injectReferrer());
+
 app.use(reqUtils.middleware.customHeaders());
 
-const dummyRoutes = require('./controller/dummy');
+const eventsRoutes = require('./controller/events');
+const tagsRoutes = require('./controller/tags');
 
-app.use(`/dummy`, dummyRoutes);
+app.use(`/events`, eventsRoutes);
+app.use(`/tags`, tagsRoutes);
 
 
 //error handling middleware
 app.use(reqUtils.middleware.defaultErrorHandler(environment));
 
-const server = app.listen(appConfig.port, () => {
-    logger.debug(`Server started on port ${appConfig.port}`);
-});
-
-module.exports = server; 
+db.sequelize.sync({
+    //force: true
+}).then(() => {
+    const server = app.listen(appConfig.port, () => {
+        logger.debug(`Server started on port ${appConfig.port}`);
+    });
+})
