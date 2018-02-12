@@ -12,7 +12,7 @@ const loggingFormatter = function (options) {
     const logLevel = options.level.toUpperCase();
     const requestId = _.get(options.meta, 'req.id');
     const message = options.message || 'undefined';
-    const referrer = _.get(options.meta, 'req.referrer');
+    const referrer = _.get(options.meta, 'req.referrer.id');
     const stack = _.get(options.meta, 'stack');
 
     return JSON.stringify({
