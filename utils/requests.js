@@ -11,7 +11,8 @@ const _ = require('lodash');
 const ApiError = require('../error/api-error');
 const logger = require('./log.js').logger;
 const appConfig = require('../config');
-
+const jwtHelper = require('../utils/jwt-helper');
+const { ValidationError } = require('../db').Sequelize;
 
 /**
  * Default resolving for errors and sending appropriate message with the response
@@ -31,6 +32,8 @@ function resolveError(err, req, res, options) {
         return res.status(err.statusCode).json(err.toJSON());
     } else if (err.statusCode) {
         return res.status(err.statusCode).json(err.error);
+    } else if (err instanceof ValidationError) {
+        return res.status(400).json(err.errors);
     } else {
         if (opts.log) {
             logger.error(`${opts.unknownErrorMessage}. Reason: ${err.message}`, { req, stack: err.stack });
@@ -67,15 +70,27 @@ function productionErrorHandler(err, req, res, next) {
     resolveError(err, req, res, { log: true, req })
 }
 
+function injectReferrer() {
+    return (req, res, next) => {
+        try {
+            req.referrer = {
+                id: jwtHelper.getReferrer(req),
+                jwt: jwtHelper.getJWT(req)
+            };
+            next();
+        } catch (err) {
+            next(new ApiError(`Cannot check referrer`, 403));
+        }
+    };
+}
+
+
 function customHeaders() {
     return (req, res, next) => {
         try {
             req.customHeaders = {
-                [appConfig.tracingHeaderKey]: req.id
-            }
-            //need to check if kauth.grant exists in order to pass JWT
-            if (typeof req.kauth.grant.access_token.token !== 'undefined') {
-                req.customHeaders[appConfig.jwtHeaderKey] = req.kauth.grant.access_token.token;
+                [appConfig.tracingHeaderKey]: req.id,
+                [appConfig.jwtHeaderKey]: req.referrer.jwt
             }
             next();
         } catch (err) {
@@ -89,6 +104,7 @@ module.exports = {
     middleware: {
         cors,
         defaultErrorHandler,
-        customHeaders
+        customHeaders,
+        injectReferrer
     }
 }
