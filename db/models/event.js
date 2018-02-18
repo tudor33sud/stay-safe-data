@@ -61,5 +61,14 @@ module.exports = function (sequelize, DataTypes) {
         // }
     );
 
+    event.getRequester = req => {
+        const userId = req.referrer.id;
+        return {
+            reference: `/users/${userId}`,
+            identifier: userId,
+            display: userId
+        };
+    }
+
     return event;
 };
