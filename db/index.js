@@ -34,6 +34,6 @@ const db = {
 };
 //DB RELATIONSHIPS to be added
 
-db.tag.belongsToMany(db.event, { as: 'tags', through: 'eventTags' });
-
+db.tag.belongsToMany(db.event, { through: 'eventTags' });
+db.event.belongsToMany(db.tag, { through: 'eventTags' });
 module.exports = db;
