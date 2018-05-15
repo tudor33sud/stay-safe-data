@@ -137,6 +137,7 @@ router.get('/:eventId/attachments/:attachmentId', async (req, res, next) => {
         const attachment = event.attachments.filter(attachment => {
             return attachment.id == req.params.attachmentId
         })[0];
+        res.setHeader(`Content-Type`, attachment.mimeType);
         fs.createReadStream(attachment.location).on('error', err => {
             next(err);
         }).pipe(res);
