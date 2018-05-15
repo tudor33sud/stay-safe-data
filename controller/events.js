@@ -101,11 +101,14 @@ router.delete('/:eventId', async (req, res, next) => {
     }
 });
 
-router.post('/:eventId/attachments', storage.upload.single('image'), async (req, res, next) => {
+router.put('/:eventId/attachments', storage.upload.single('image'), async (req, res, next) => {
     try {
         const event = await db.event.findById(req.params.eventId);
         if (!event) {
             throw new ApiError('Event not found', 404);
+        }
+        if (!file) {
+            throw new ApiError('No file given', 400);
         }
         const file = req.file;
         event.attachments.push({ id: (event.attachments.length + 1).toString(), location: file.path, mimeType: file.mimetype });
