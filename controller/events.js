@@ -5,6 +5,9 @@ const logger = require('../utils/log').logger;
 const validation = require('../validation');
 const validationResult = validation.result;
 const db = require('../db');
+const Op = db.sequelize.Op;
+const storage = require('../service/storage');
+const fs = require('fs');
 
 router.get('/', [validation.events.getAll()], async (req, res, next) => {
     try {
@@ -93,6 +96,50 @@ router.delete('/:eventId', async (req, res, next) => {
         }
         const deleted = await event.destroy();
         res.status(204).json(deleted);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/:eventId/attachments', storage.upload.single('image'), async (req, res, next) => {
+    try {
+        const event = await db.event.findById(req.params.eventId);
+        if (!event) {
+            throw new ApiError('Event not found', 404);
+        }
+        const file = req.file;
+        event.attachments.push({ id: (event.attachments.length + 1).toString(), location: file.path, mimeType: file.mimetype });
+        event.set({
+            attachments: event.attachments
+        });
+        const updated = await event.save();
+        res.json(updated);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get('/:eventId/attachments/:attachmentId', async (req, res, next) => {
+    try {
+        const event = await db.event.find({
+            where: {
+                id: req.params.eventId,
+                attachments: {
+                    [Op.contains]: [{
+                        id: req.params.attachmentId
+                    }]
+                }
+            }
+        });
+        if (!event) {
+            throw new ApiError(`Resource not found`, 404);
+        }
+        const attachment = event.attachments.filter(attachment => {
+            return attachment.id == req.params.attachmentId
+        })[0];
+        fs.createReadStream(attachment.location).on('error', err => {
+            next(err);
+        }).pipe(res);
     } catch (err) {
         next(err);
     }

@@ -38,6 +38,10 @@ module.exports = function (sequelize, DataTypes) {
         location: {
             type: DataTypes.JSONB,
             allowNull: false
+        },
+        attachments: {
+            type: DataTypes.JSONB,
+            defaultValue: []
         }
     },
         // {
