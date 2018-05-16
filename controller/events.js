@@ -107,7 +107,7 @@ router.put('/:eventId/attachments', storage.upload.single('image'), async (req, 
         if (!event) {
             throw new ApiError('Event not found', 404);
         }
-        if (!file) {
+        if (!req.file) {
             throw new ApiError('No file given', 400);
         }
         const file = req.file;
