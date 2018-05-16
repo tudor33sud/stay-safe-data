@@ -1,3 +1,4 @@
+const jwtHelper = require('../../utils/jwt-helper');
 module.exports = function (sequelize, DataTypes) {
 
     const event = sequelize.define('event', {
@@ -67,10 +68,13 @@ module.exports = function (sequelize, DataTypes) {
 
     event.getRequester = req => {
         const userId = req.referrer.id;
+        const userJWT = req.referrer.jwt;
+        const decoded = jwtHelper.decode(userJWT);
+
         return {
             reference: `/users/${userId}`,
             identifier: userId,
-            display: userId
+            display: decoded.email ? decoded.email : userId
         };
     }
 
