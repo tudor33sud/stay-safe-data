@@ -24,10 +24,10 @@ app.use(reqUtils.middleware.customHeaders());
 
 const eventsRoutes = require('./controller/events');
 const tagsRoutes = require('./controller/tags');
-
+const trackingRoutes = require('./controller/tracking');
 app.use(`/events`, eventsRoutes);
 app.use(`/tags`, tagsRoutes);
-
+app.use(`/tracking`,trackingRoutes);
 
 //error handling middleware
 app.use(reqUtils.middleware.defaultErrorHandler(environment));
