@@ -34,9 +34,15 @@ router.get('/:eventId', async (req, res, next) => {
         const event = await db.event.find({
             where: {
                 id: req.params.eventId,
-                requester: {
-                    identifier: req.referrer.id
+                [Op.or]: {
+                    requester: {
+                        identifier: req.referrer.id
+                    },
+                    performer: {
+                        identifier: req.referrer.id
+                    }
                 }
+
             }
         });
         if (!event) {
