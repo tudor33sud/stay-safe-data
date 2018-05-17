@@ -41,17 +41,16 @@ router.put('/events/:eventId/performer', async (req, res, next) => {
                 throw new ApiError(`Event not found`, 404);
             }
 
+            if (event.status !== 'requested') {
+                throw new ApiError(`Event already taken`, 409);
+            }
+
             event.set({
                 performer: db.event.getRequester(req),
                 status: "busy",
                 statusReason: "Help is on the way!"
             });
             const updatedEvent = await event.save({ transaction });
-            // const updatedEvent = await db.event.update({
-            //     performer: db.event.getRequester(req),
-            //     status: "busy",
-            //     statusReason: "Help is on the way"
-            // }, { transaction });
             await transaction.commit();
             res.json(updatedEvent);
         } catch (err) {
