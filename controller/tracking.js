@@ -69,7 +69,7 @@ router.put('/events/:eventId/performer', async (req, res, next) => {
                 performer: db.event.getRequester(req),
                 status: "busy",
                 statusReason: "Help is on the way!"
-            });
+            }, { transaction });
             const updatedEvent = await event.save({ transaction });
             await transaction.commit();
             res.json(updatedEvent);
@@ -83,5 +83,39 @@ router.put('/events/:eventId/performer', async (req, res, next) => {
         next(err);
     }
 });
+
+router.post('/events/:eventId/actions/finish', async (req, res, next) => {
+    try {
+        const transaction = await db.sequelize.transaction();
+        try {
+            const event = await db.event.find({
+                where: {
+                    id: req.params.eventId,
+                    status: 'busy',
+                    performer: {
+                        identifier: {
+                            [Op.eq]: req.referrer.id
+                        }
+                    }
+                }
+            }, { transaction });
+            if (!event) {
+                throw new ApiError(`Resource not found`, 404);
+            }
+            event.set({
+                status: "finished",
+                statusReason: "Event was successfully acted upon."
+            }, { transaction });
+            const updatedEvent = await event.save({ transaction });
+            await transaction.commit();
+            res.json(updatedEvent);
+        } catch (err) {
+            await transaction.rollback();
+            throw err;
+        }
+    } catch (err) {
+        next(err);
+    }
+})
 
 module.exports = router;
