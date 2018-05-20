@@ -15,12 +15,31 @@ router.get('/events', [validation.events.getAll()], async (req, res, next) => {
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.mapped() });
         }
-        const events = await db.event.findAll({
-            where: {
-                status: 'requested'
-            },
-            include: [{ model: db.tag }]
-        });
+        function getRequestedEvents() {
+            return db.event.findAll({
+                where: {
+                    status: 'requested'
+                },
+                include: [{ model: db.tag }]
+            });
+        }
+
+        function getActiveEvents(referrer) {
+            return db.event.findAll({
+                where: {
+                    status: 'busy',
+                    performer: {
+                        identifier: {
+                            [Op.eq]: referrer.id
+                        }
+                    }
+                },
+                include: [{ model: db.tag }]
+            });
+        }
+
+
+        const events = req.query.active ? await getActiveEvents(req.referrer) : await getRequestedEvents()
         if (events.length === 0) {
             return res.status(204).send();
         }

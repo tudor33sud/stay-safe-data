@@ -3,11 +3,12 @@ const _ = require('lodash');
 const helpers = require('./_helpers');
 function getEvents() {
     return [
+        query('active', 'Active should be a boolean').optional().isBoolean()
         //param('userId', 'User id should be a non empty string').isLength({ min: 1, max: 50 })
     ];
 }
 const priorities = ['low', 'medium', 'high'];
-const performerTypes = ['ambulance','doctor'];
+const performerTypes = ['ambulance', 'doctor'];
 
 function createEvent() {
     return [
