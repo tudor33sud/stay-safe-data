@@ -15,7 +15,10 @@ router.get('/', [validation.events.getAll()], async (req, res, next) => {
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.mapped() });
         }
-        const events = await db.event.findAll({ where: {} });
+        const events = await db.event.findAll({
+            where: {},
+            include: [{ model: db.tag }]
+        });
         if (events.length === 0) {
             return res.status(204).send();
         }
@@ -69,13 +72,16 @@ router.post('/', [validation.events.create()], async (req, res, next) => {
             if (foundTags.length !== tags.length) {
                 throw new ApiError(`Cannot find all tags`, 404);
             }
+            const splittedLocation = location.trim().split(',');
+            const locationLatLng = {
+                lat: splittedLocation[0],
+                lng: splittedLocation[1]
+            };
             const createdEvent = await db.event.create({
                 priority,
                 description,
                 performerType,
-                location: {
-                    latlon: location
-                },
+                location: locationLatLng,
                 requester: db.event.getRequester(req)
             }, { transaction: transaction });
             const addEvents = foundTags.map(tag => {

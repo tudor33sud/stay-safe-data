@@ -18,7 +18,8 @@ router.get('/events', [validation.events.getAll()], async (req, res, next) => {
         const events = await db.event.findAll({
             where: {
                 status: 'requested'
-            }
+            },
+            include: [{ model: db.tag }]
         });
         if (events.length === 0) {
             return res.status(204).send();
