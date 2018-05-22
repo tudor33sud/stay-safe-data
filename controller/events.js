@@ -16,8 +16,16 @@ router.get('/', [validation.events.getAll()], async (req, res, next) => {
             return res.status(400).json({ errors: errors.mapped() });
         }
         const events = await db.event.findAll({
-            where: {},
-            include: [{ model: db.tag }]
+            where: {
+                requester: {
+                    identifier: {
+                        [Op.eq]: req.referrer.id
+                    }
+                }
+            },
+            include: [{ model: db.tag }],
+            order: [[db.sequelize.literal(`status='finished', status='busy', status='requested'`)],
+            ["createdAt", "DESC"]]
         });
         if (events.length === 0) {
             return res.status(204).send();
