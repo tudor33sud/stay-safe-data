@@ -73,7 +73,7 @@ router.post('/', [validation.events.create()], async (req, res, next) => {
         }
         const transaction = await db.sequelize.transaction();
         try {
-            const { priority, description, performerType, location, tags } = req.body;
+            const { priority, description, performerType, location, tags, address } = req.body;
             const foundTags = await db.tag.findAll({
                 where: { id: tags }
             });
@@ -83,7 +83,8 @@ router.post('/', [validation.events.create()], async (req, res, next) => {
             const splittedLocation = location.trim().split(',');
             const locationLatLng = {
                 lat: splittedLocation[0],
-                lng: splittedLocation[1]
+                lng: splittedLocation[1],
+                address: address
             };
             const createdEvent = await db.event.create({
                 priority,
