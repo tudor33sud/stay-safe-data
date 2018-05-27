@@ -8,7 +8,6 @@ const db = require('../db');
 const Op = db.sequelize.Op;
 const storage = require('../service/storage');
 const fs = require('fs');
-
 router.get('/events', [validation.events.getAll()], async (req, res, next) => {
     try {
         const errors = validationResult(req);
@@ -102,9 +101,11 @@ router.post('/events/:eventId/actions/finish', async (req, res, next) => {
             if (!event) {
                 throw new ApiError(`Resource not found`, 404);
             }
+            const duration = new Date().getTime() - (new Date(event.createdAt)).getTime();
             event.set({
                 status: "finished",
-                statusReason: "Event was successfully acted upon."
+                statusReason: "Event was successfully acted upon.",
+                duration
             }, { transaction });
             const updatedEvent = await event.save({ transaction });
             await transaction.commit();
