@@ -5,17 +5,19 @@ var storage = multer.diskStorage({
     destination: `data/imageUploads`,
     filename: function (req, file, cb) {
         const mimeType = file.mimetype;
-        if (mimeType.includes('image')) {
-            const fileName = `${uuid.v4()}.${mimeType.substr(mimeType.lastIndexOf('/') + 1)}`;
-            cb(null, fileName);
-        } else {
-            cb(new ApiError('File type not supported', 400));
-        }
-
+        const fileName = `${uuid.v4()}.${mimeType.substr(mimeType.lastIndexOf('/') + 1)}`;
+        cb(null, fileName);
     }
 })
 const upload = multer({
-    storage
+    storage,
+    fileFilter: function (req, file, cb) {
+        const mimeType = file.mimetype;
+        if (!mimeType.includes('image')) {
+            return cb(new ApiError(`File type filtered out`, 400));
+        }
+        cb(null, true);
+    }
 });
 
 module.exports = {
