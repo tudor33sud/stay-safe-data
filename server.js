@@ -33,7 +33,8 @@ app.use(`/tracking`,trackingRoutes);
 app.use(reqUtils.middleware.defaultErrorHandler(environment));
 
 db.sequelize.sync({
-    //force: true
+    force: true
+    //alter:true
 }).then(() => {
     const server = app.listen(appConfig.port, () => {
         logger.debug(`Server started on port ${appConfig.port}`);

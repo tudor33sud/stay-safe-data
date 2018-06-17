@@ -14,12 +14,29 @@ router.get('/events', [validation.events.getAll()], async (req, res, next) => {
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.mapped() });
         }
-        function getRequestedEvents() {
-            return db.event.findAll({
-                where: {
+
+        function getRequestedEvents(lat, lng) {
+            let whereClause;
+            if (!lat || !lng) {
+                whereClause = {
                     status: 'requested'
-                },
-                include: [{ model: db.tag }]
+                }
+            } else {
+                whereClause = db.sequelize.and(db.sequelize.where(
+                    db.sequelize.fn(`ST_DWithin`,
+                        db.sequelize.col(`position`),
+                        db.sequelize.fn('ST_SetSRID',
+                            db.sequelize.fn(`ST_MakePoint`, req.query.lng, req.query.lat),
+                            4326),
+                        0.032),
+                    true), db.sequelize.literal(`status='requested'`));
+            }
+            return db.event.findAll({
+                where: whereClause,
+                include: [{ model: db.tag }],
+                order: db.sequelize.fn('ST_Distance', db.sequelize.col('position'), db.sequelize.fn('ST_SetSRID',
+                    db.sequelize.fn(`ST_MakePoint`, req.query.lng, req.query.lat),
+                    4326))
             });
         }
 
@@ -38,7 +55,7 @@ router.get('/events', [validation.events.getAll()], async (req, res, next) => {
         }
 
 
-        const events = req.query.active ? await getActiveEvents(req.referrer) : await getRequestedEvents()
+        const events = req.query.active ? await getActiveEvents(req.referrer) : await getRequestedEvents(req.query.lat, req.query.lng)
         if (events.length === 0) {
             return res.status(204).send();
         }

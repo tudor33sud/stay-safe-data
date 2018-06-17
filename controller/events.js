@@ -86,11 +86,19 @@ router.post('/', [validation.events.create()], async (req, res, next) => {
                 lng: splittedLocation[1],
                 address: address
             };
+            const point = {
+                type: 'POINT',
+                coordinates: [locationLatLng.lng, locationLatLng.lat],
+                crs: {
+                    type: 'name', properties: { name: 'EPSG:4326' }
+                }
+            };
             const createdEvent = await db.event.create({
                 priority,
                 description,
                 performerType,
                 location: locationLatLng,
+                position: point,
                 requester: db.event.getRequester(req)
             }, { transaction: transaction });
             const addEvents = foundTags.map(tag => {

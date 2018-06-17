@@ -43,30 +43,30 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.JSONB,
             allowNull: false
         },
+        position: {
+            type: DataTypes.GEOMETRY('POINT', 4326),
+            allowNull: false
+        },
         attachments: {
             type: DataTypes.JSONB,
             defaultValue: []
         }
     },
-        // {
-        //     indexes: [
-        //         {
-        //             fields: ['status']
-        //         },
-        //         {
-        //             fields: ['priority']
-        //         },
-        //         {
-        //             fields: ['tags'],
-        //             using: 'gin',
-        //             operator: 'jsonb_path_ops'
-        //         }, {
-        //             fields: ['performer'],
-        //             using: 'gin',
-        //             operator: 'jsonb_path_ops'
-        //         }
-        //     ]
-        // }
+        {
+            indexes: [
+                {
+                    fields: ['status']
+                },
+                {
+                    fields: ['priority']
+                },
+                {
+                    fields: ['performer'],
+                    using: 'gin',
+                    operator: 'jsonb_path_ops'
+                }
+            ]
+        }
     );
 
     event.getRequester = req => {
